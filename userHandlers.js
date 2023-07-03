@@ -29,7 +29,9 @@ const getUsers = (req, res) => {
       where.map(({ value }) => value)
     )
     .then(([users]) => {
-      res.json(users);
+      res.json(users.map(e => {
+        return {id:e.id, firstname:e.firstname, lastname:e.lastname, email:e.email, city:e.city, language:e.language};
+      }));
     })
     .catch((err) => {
       console.error(err);
@@ -56,12 +58,12 @@ const getUserById = (req, res) => {
 };
 
 const postUser = (req, res) => {
-  const { firstname, lastname, email, city, language } = req.body;
+  const { firstname, lastname, email, city, language, hashedPassword } = req.body;
 
   database
     .query(
-      "INSERT INTO users(firstname, lastname, email, city, language) VALUES (?, ?, ?, ?, ?)",
-      [firstname, lastname, email, city, language]
+      "INSERT INTO users(firstname, lastname, email, city, language, hashedPassword) VALUES (?, ?, ?, ?, ?, ?)",
+      [firstname, lastname, email, city, language, hashedPassword]
     )
     .then(([result]) => {
       res.location(`/api/users/${result.insertId}`).sendStatus(201);
