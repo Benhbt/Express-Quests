@@ -19,25 +19,40 @@ const userHandlers = require("./userHandlers");
 
 const { validateMovie } = require("./validator.js");
 const { validateUser } = require("./validator.js");
-const { hashPassword } = require("./auth.js");
+const { hashPassword, verifyPassword, verifyToken } = require("./auth");
 
 app.get("/api/movies", movieHandlers.getMovies);
 app.get("/api/movies/:id", movieHandlers.getMovieById);
 
-app.post("/api/movies", validateMovie, movieHandlers.postMovie);
+app.post("/api/movies",verifyToken, validateMovie, movieHandlers.postMovie);
 
-app.put("/api/movies/:id", validateMovie, movieHandlers.updateMovie);
+app.put("/api/movies/:id",verifyToken, validateMovie, movieHandlers.updateMovie);
 
-app.delete("/api/movies/:id",movieHandlers.deleteMovie);
+app.delete("/api/movies/:id",verifyToken, movieHandlers.deleteMovie);
 
 app.get("/api/users", userHandlers.getUsers);
 app.get("/api/users/:id", userHandlers.getUserById);
 
 app.post("/api/users", hashPassword,validateUser, userHandlers.postUser);
 
-app.put("/api/users/:id", hashPassword,validateUser, userHandlers.updateUser);
+app.put("/api/users/:id",verifyToken, hashPassword,validateUser, userHandlers.updateUser);
 
-app.delete("/api/users/:id",userHandlers.deleteUser);
+app.delete("/api/users/:id",verifyToken, userHandlers.deleteUser);
+
+
+const isItDwight = (req, res) => {
+  if (req.body.email === "ben@theoffice.com" && req.body.password === "123456") {
+    res.send("Credentials are valid");
+  } else {
+    res.sendStatus(401);
+  }
+};
+
+app.post(
+  "/api/login",
+  userHandlers.getUserByEmailWithPasswordAndPassToNext,
+  verifyPassword
+);
 
 
 app.listen(port, (err) => {
